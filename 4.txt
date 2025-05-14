@@ -1,0 +1,55 @@
+# 1. Import Libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, LabelEncoder
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+# 2. Load the Dataset
+data = pd.read_csv(r"C:\Users\Pranav\Downloads\insurance.csv")
+
+# 3. Preprocess the Data
+le = LabelEncoder()
+data["smoker"] = le.fit_transform(data["smoker"])    # Yes/No → 1/0
+data["sex"] = le.fit_transform(data["sex"])          # Male/Female → 1/0
+data["region"] = le.fit_transform(data["region"])    # Optional
+
+# 4. Select Features and Target Variable
+X = data[["age", "bmi"]].values                      # Features
+y = data["smoker"].values                            # Target (0 or 1)
+
+# 5. Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# 6. Feature Scaling
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 7. Train the KNN Model
+knn = KNeighborsClassifier(n_neighbors=3)
+knn.fit(X_train_scaled, y_train)
+
+# 8. Make Predictions and Evaluate
+y_pred = knn.predict(X_test_scaled)
+acc = accuracy_score(y_test, y_pred)
+print(f"Accuracy: {acc:.2f}")
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+# 10. Plot Decision Boundary
+x_min, x_max = X[:, 0].min() - 1, X[:, 0].max() + 1
+y_min, y_max = X[:, 1].min() - 1, X[:, 1].max() + 1
+xx, yy = np.meshgrid(np.linspace(x_min, x_max, 200), np.linspace(y_min, y_max, 200))
+mesh_points = np.c_[xx.ravel(), yy.ravel()]
+Z = knn.predict(scaler.transform(mesh_points)).reshape(xx.shape)
+
+plt.contourf(xx, yy, Z, alpha=0.3, cmap='coolwarm')
+sns.scatterplot(x=X[:, 0], y=X[:, 1], hue=y, palette='coolwarm', edgecolor='k')
+plt.xlabel("Age")
+plt.ylabel("BMI")
+plt.title("KNN Decision Boundary (Smoker Classification)")
+plt.legend(title="Smoker", labels=["No (0)", "Yes (1)"])
+plt.show()

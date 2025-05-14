@@ -1,0 +1,32 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_breast_cancer
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from mpl_toolkits.mplot3d import Axes3D
+
+data = load_breast_cancer()
+
+df = pd.DataFrame(data['data'],columns=data['feature_names'])
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(df)
+
+pca = PCA(n_components=3)
+pca_result = pca.fit_transform(scaled_data)
+
+plt.figure(figsize=(12,12))
+plt.scatter(pca_result[:,0],pca_result[:,1],c=data['target'],cmap='plasma')
+plt.xlabel("PCA1")
+plt.ylabel("PCA2")
+plt.grid()
+plt.show()
+
+fig = plt.figure(figsize=(12,12))
+ax = fig.add_subplot(111,projection='3d')
+ax.scatter(pca_result[:,0],pca_result[:,1],pca_result[:,2],c=data['target'],cmap='plasma')
+ax.set_xlabel("PCA1")
+ax.set_ylabel("PCA2")
+ax.set_zlabel("PCA3")
+ax.grid()
+plt.show()

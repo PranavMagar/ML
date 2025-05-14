@@ -1,0 +1,60 @@
+# Installing dython
+!pip install dython
+
+# Importing required libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+import warnings
+warnings.filterwarnings("ignore")
+
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import accuracy_score, roc_curve, precision_score, recall_score, roc_auc_score
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from dython.nominal import associations
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from sklearn import metrics
+
+# Reading the dataset
+df = pd.read_csv(r"C:\Users\Pranav\Downloads\diabetes.csv")
+
+# Basic EDA
+print(df["Outcome"].value_counts(normalize=True))
+print(df.shape)
+df.info()
+df.describe()
+
+# Heatmap of feature correlations
+sns.heatmap(df.corr(), annot=True)
+
+# Visualizing distributions of all features
+plt.figure(figsize=(10, 15), facecolor='white')
+plotnumber = 1
+for column in df:
+    if plotnumber <= 9:
+        ax = plt.subplot(3, 3, plotnumber)
+        sns.distplot(df[column])
+        plt.xlabel(column, fontsize=12)
+        plotnumber += 1
+plt.tight_layout()
+plt.show()
+
+# Splitting features and label
+X = df.drop("Outcome", axis=1)
+Y = df["Outcome"]
+
+# Standardizing the features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# Variance Inflation Factor (VIF)
+vif = pd.DataFrame()
+vif["VIF"] = [variance_inflation_factor(X_scaled, i) for i in range(X_scaled.shape[1])]
+vif["Features"] = X.columns
+print(vif)
+
+# Dython association matrix
+associations(df, figsize=(6, 6), cmap="twilight", annot=True)
